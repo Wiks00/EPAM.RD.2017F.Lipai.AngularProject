@@ -1,0 +1,40 @@
+﻿<div ng-controller="ImageUploaderController">
+    <form class="form" ng-submit="Upload(image)" role="form" id="image-nav"  enctype="multipart/form-data">
+        <div class="form-group">
+            <select ng-options="album.title for album in Albums" ng-model="image.AlbumId" ></select>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="ImageInputTitle">Title</label>
+            <input type="text" class="form-control" id="ImageInputTitle" placeholder="Title" ng-model="image.Title" required>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="ImageInputDescription">Description</label>
+            <input type="text" class="form-control" id="ImageInputDescription" placeholder="Description" ng-model="image.Description" required>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="ImageInputPrice">Price</label>
+            <input type="number" class="form-control" id="ImageInputPrice" min="0" step="0.10" value="1$" pattern="^\\$?(([1-9](\\d*|\\d{0,2}(,\\d{3})*))|0)(\\.\\d{1,2})?$" ng-model="image.Price" required>
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="ImageInputFileFromPc">Image</label>
+            <select ng-model="selection" ng-options="item for item in items"></select>
+            <br/>
+            <div ng-switch on="selection">
+                <input ng-switch-when="byFileSystem" type="file" accept="image/*" class="form-control" id="ImageInputFileFromPc" fileread="image.Data">
+                <input ng-switch-when="byUrl" type="text" class="form-control" id="ImageInputFileFromUrl" placeholder="Url" ng-model="image.Data">
+            </div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Upload</button>
+        </div>
+    </form>
+    <form class="form" ng-submit="AddAlbum(title)" role="form" id="album-nav">
+        <div class="form-group">
+            <label class="sr-only" for="AlbumInputTitle">Title</label>
+            <input type="text" class="form-control" id="AlbumInputTitle" placeholder="Title" ng-model="title" required>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Add</button>
+        </div>
+    </form>
+</div>

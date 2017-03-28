@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="8ccadb5ab2504edab729741684d07884" Name="Diagram1">
+        <EntityTypeShape EntityType="GalleryModel.Albums" Width="1.5" PointX="3" PointY="1.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="GalleryModel.Images" Width="1.5" PointX="5.25" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="GalleryModel.Roles" Width="1.5" PointX="3" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="GalleryModel.Users" Width="1.5" PointX="0.75" PointY="2.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="GalleryModel.Votes" Width="1.5" PointX="7.5" PointY="2" IsExpanded="true" />
+        <AssociationConnector Association="GalleryModel.album_fk0" ManuallyRouted="false" />
+        <AssociationConnector Association="GalleryModel.image_fk0" ManuallyRouted="false" />
+        <AssociationConnector Association="GalleryModel.Votes_fk1" ManuallyRouted="false" />
+        <AssociationConnector Association="GalleryModel.Votes_fk0" ManuallyRouted="false" />
+        <AssociationConnector Association="GalleryModel.Membership" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

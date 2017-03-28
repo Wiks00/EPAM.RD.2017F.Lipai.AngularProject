@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html ng-app="main">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <base href="/">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title – приложение ASP.NET</title>
+    <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css'>
+    @Styles.Render("~/Content/css")
+</head>
+<body class="main">
+    <div class="navbar navbar-inverse navbar-fixed-top" ng-controller="HeaderController">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Jurassic park thematic gallery", "Index", "Angular", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home page", "Index", "Angular")</li>
+                    <li>@Html.ActionLink("About", "About", "Angular")</li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggl" data-toggle="dropdown">Gallery <span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>@Html.ActionLink("Add image", "AddImage", "Angular")</li>
+                            <li>@Html.ActionLink("View albums", "Gallery", "Angular")</li>
+                            <li ng-if="isUserModerator" class="divider"></li>
+                            <li ng-if="isUserModerator" >@Html.ActionLink("Moderate images", "Moderate", "Angular")</li>
+                        </ul>
+                    </li>
+                </ul>
+                <div ng-if="isUserLoggedIn">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li style="padding-top:15px;"><b>Hello adventurer {{globals.currentUser.username}}</b></li>
+                        <li>@Html.ActionLink("Basket", "Basket", "Angular")</li>
+                        <li><a href="#" ng-click="Logout()"><b>Logout</b></a></li>
+                    </ul>
+                </div>
+                <div ng-if="!isUserLoggedIn">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>{{LoginOrRegister}} here, adventurer</b> <span class="caret"></span></a>
+                            <ul id="login-dp" class="dropdown-menu">
+                                <li>
+                                    <div class="row">
+                                        <div class="col-md-12" ng-switch="LoginOrRegister">
+                                            <div ng-switch-when="Login">
+                                                <form class="form" ng-submit="Login(userName,password)" role="form" id="login-nav">
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="LoginInputUsername">User name</label>
+                                                        <input type="text" class="form-control" id="LoginInputUsername" placeholder="User name" ng-model="userName" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="LoginInputPassword">Password</label>
+                                                        <input type="password" class="form-control" id="LoginInputPassword" placeholder="Password" ng-model="password" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+                                                    </div>
+                                                </form>
+                                                <div class="bottom text-center" style="color: black">
+                                                    New here ? <a href="#" ng-click="Switch()"><b>Join</b></a>
+                                                </div>
+                                            </div>
+                                            <div ng-switch-when="Register">
+                                                <form class="form" ng-submit="Register(user)" role="form" id="register-nav">
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="RegisterInputUsername">Your future user name</label>
+                                                        <input type="text" name="username" class="form-control" id="RegisterInputUsername" placeholder="User name" ng-model="user.UserName" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="RegisterInputPassword">Super password</label>
+                                                        <input type="password" name="password" class="form-control" id="RegisterInputPassword" placeholder="Password" ng-model="user.Password" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="RegisterInputPasswordConfirm">Repeat password</label>
+                                                        <input type="password" name ="confpassword" class="form-control" id="RegisterInputPasswordConfirm" placeholder="Password" ng-model="user.ConfirmPassword" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <button type="submit" class="btn btn-primary btn-block">Register</button>
+                                                    </div>
+                                                </form>
+                                                <div class="bottom text-center" style="color: black">
+                                                    Already have an accoun ? <a href="#" ng-click="Switch()"><b>Login</b></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        <div ng-view></div>
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year – приложение ASP.NET</p>
+        </footer>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+</body>
+</html>

@@ -1,0 +1,30 @@
+﻿<div ng-controller="GalleryController">
+    <div class="container">
+        <div class="row">
+            <div class="gallery col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h1 class="gallery-title">Gallery</h1>
+            </div>
+            <div align="center">
+                <div class="image-view" ng-repeat="format in formats">
+                    <button class="btn btn-default filter-button" data-filter="{{format}}">{{format}}</button>
+    
+                </div>
+                <br />
+                <select id="albumsList" ng-options="item.title for item in data" ng-model="selectedAlbum"></select>
+                <div class="image-view" ng-repeat="image in selectedAlbum.images" ng-init="getRating(image)">
+                    <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe">
+                        <ng-image-preview image="image"></ng-image-preview>
+                        <ng-star-rating ng-model="image.personalRating"  on-rating-select="updateRating(image.id, rating, selectedAlbum.id)"></ng-star-rating><br/>
+                        <ng-star-rating ng-model="image.globalRating"  readonly="true"></ng-star-rating>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="myModal" class="modal">
+    
+            <img class="modal-content" id="img01" ng-click="close()">
+    
+            <div id="caption"></div>
+        </div>
+    </div>
+</div>
