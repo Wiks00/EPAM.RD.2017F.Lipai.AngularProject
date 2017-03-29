@@ -1,0 +1,15 @@
+﻿<div ng-controller="BasketController">
+    <div class="container">
+        <div class="row">
+            <form class="form" ng-submit="buy(data)" role="form" id="image-nav">
+                <div class="image-view" ng-repeat="image in data">
+                    <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe">
+                        <ng-image-preview image="image"></ng-image-preview>
+                        <button type="button" ng-click="deleteItem($index)" class="btn btn-primary btn-default">delete</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">{{total}} $</button>
+            </form>
+        </div>
+    </div>
+</div>

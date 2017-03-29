@@ -5,17 +5,23 @@
                 <h1 class="gallery-title">Gallery</h1>
             </div>
             <div align="center">
-                <div class="image-view" ng-repeat="format in formats">
-                    <button class="btn btn-default filter-button" data-filter="{{format}}">{{format}}</button>
-    
+                <div class="image-view" style="display: inline-block; padding-right: 5px" ng-repeat="format in formats">
+                    <button id="format{{$index}}" class="btn btn-default filter-button" data-filter="{{format}}" ng-click="filter(formats[$index], $index)">{{format}}</button>
                 </div>
-                <br />
-                <select id="albumsList" ng-options="item.title for item in data" ng-model="selectedAlbum"></select>
+            </div>
+            <br/>
+            <div align="center">
+                <select id="albumsList" ng-options="album.title for album in data" ng-model="selectedAlbum">
+                    <option value="?" selected="selected"></option>
+                </select>
                 <div class="image-view" ng-repeat="image in selectedAlbum.images" ng-init="getRating(image)">
-                    <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe">
-                        <ng-image-preview image="image"></ng-image-preview>
-                        <ng-star-rating ng-model="image.personalRating"  on-rating-select="updateRating(image.id, rating, selectedAlbum.id)"></ng-star-rating><br/>
-                        <ng-star-rating ng-model="image.globalRating"  readonly="true"></ng-star-rating>
+                    <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter {{image.format}}">
+                        <form class="form" ng-submit="buyImage(image)" role="form" id="gallery-nav">
+                            <ng-image-preview image="image"></ng-image-preview>
+                            <ng-star-rating ng-model="image.personalRating" on-rating-select="updateRating(image.id, rating, selectedAlbum.id)"></ng-star-rating><br />
+                            <ng-star-rating ng-model="image.globalRating" readonly="true"></ng-star-rating>
+                            <button id="dtn{{image.id}}" type="submit" class="btn btn-primary btn-block">{{isInBasket(image)}}</button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,1 @@
+<ng-spoiler ng-model="fg" ng-init="fg='ffffffffffffffffffffffffff'"></ng-spoiler>

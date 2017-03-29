@@ -1,18 +1,25 @@
 ﻿<div ng-controller="ModeratorController">
-    <div class="image-view" ng-repeat="image in data">
-        <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe">
-            <ng-image-preview image="image"></ng-image-preview>
-            <br />
-            <label>
-                <input type="radio" ng-model="image.allowable" value="true">
-                Approve
-            </label>
-            <br />
-            <label>
-                <input type="radio" ng-model="image.allowable" value="false">
-                Unapprove
-            </label>
-            <br />
+    <div class="container">
+        <div class="row">
+            <form class="form" ng-submit="moderate(data)" role="form" id="moder-nav">
+                <div class="image-view" ng-repeat="image in data">
+                    <div class="gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe">
+                        <ng-image-preview image="image"></ng-image-preview>
+                        <br />
+                        <label>
+                            <input type="radio" ng-model="image.allowable" ng-value="true">
+                            Approve
+                        </label>
+                        <label>
+                            <input type="radio" ng-model="image.allowable" ng-value="false">
+                            Unapprove
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

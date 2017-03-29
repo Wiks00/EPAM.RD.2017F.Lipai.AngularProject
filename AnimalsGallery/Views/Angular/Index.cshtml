@@ -18,26 +18,26 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Jurassic park thematic gallery", "Index", "Angular", new { area = "" }, new { @class = "navbar-brand" })
+                <a href="/Angular/Index" class = "navbar-brand">Jurassic park thematic gallery</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home page", "Index", "Angular")</li>
-                    <li>@Html.ActionLink("About", "About", "Angular")</li>
+                    <li><a href="/Angular/Index">Home page</a></li>
+                    <li><a href="/Angular/About">About</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggl" data-toggle="dropdown">Gallery <span class="caret"></span></a>
                         <ul class="dropdown-menu" role="menu">
-                            <li>@Html.ActionLink("Add image", "AddImage", "Angular")</li>
-                            <li>@Html.ActionLink("View albums", "Gallery", "Angular")</li>
+                            <li><a href="/Angular/AddImage">Add image</a></li>
+                            <li><a href="/Angular/Gallery">View albums</a></li>
                             <li ng-if="isUserModerator" class="divider"></li>
-                            <li ng-if="isUserModerator" >@Html.ActionLink("Moderate images", "Moderate", "Angular")</li>
+                            <li ng-if="isUserModerator"><a href="/Angular/Moderate">Moderate images</a></li>
                         </ul>
                     </li>
                 </ul>
                 <div ng-if="isUserLoggedIn">
                     <ul class="nav navbar-nav navbar-right">
-                        <li style="padding-top:15px;"><b>Hello adventurer {{globals.currentUser.username}}</b></li>
-                        <li>@Html.ActionLink("Basket", "Basket", "Angular")</li>
+                        <li style="padding-top:15px;"><b>Hello adventurer {{CurrentUser.username}}</b></li>
+                        <li><a href="/Angular/Basket">Basket</a></li>
                         <li><a href="#" ng-click="Logout()"><b>Logout</b></a></li>
                     </ul>
                 </div>
@@ -109,5 +109,6 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/angular")
+  
 </body>
 </html>

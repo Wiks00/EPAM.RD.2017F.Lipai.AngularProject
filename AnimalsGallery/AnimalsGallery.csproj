@@ -176,6 +176,7 @@
     <Content Include="App_Data\GalleryDB_log.ldf">
       <DependentUpon>GalleryDB.mdf</DependentUpon>
     </Content>
+    <Content Include="Content\about.txt" />
     <Content Include="Content\jurassic-park-wallpaper-1.jpg" />
     <Content Include="Content\jurassic-park-wallpaper-6.jpg" />
     <Content Include="DAL\Gallery.Context.tt">
@@ -218,6 +219,8 @@
     <Content Include="DAL\Gallery.edmx.diagram">
       <DependentUpon>Gallery.edmx</DependentUpon>
     </Content>
+    <None Include=".bin\git.cmd" />
+    <None Include=".bin\node.cmd" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -233,6 +236,7 @@
     <Content Include="Scripts\underscore.js" />
     <Content Include="Scripts\underscore.min.js" />
     <Content Include="Scripts\_references.js" />
+    <Content Include="Views\Basket\Basket.html" />
     <Content Include="Views\Moderator\ModeratePage.html" />
     <Content Include="Views\Errors\404.html" />
     <Content Include="Views\Gallery\AddImage.html" />

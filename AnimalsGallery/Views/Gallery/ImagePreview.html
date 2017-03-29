@@ -1,5 +1,7 @@
 ﻿<div >
-    <img id ="img{{image.id}}" src="/Api/LoadImage?imageId={{image.id}}" class="img-responsive" ng-click="zoom(image.id)">
+    <p>{{image.title}}</p>
+    <img id="img{{image.id}}" src="/Api/LoadImage?imageId={{image.id}}" class="img-responsive" ng-click="zoom(image.id)">
     <p>{{image.description | uppercase}}</p>
+    <p>{{image.price}} $</p>
     <p ng-if="image.date"> date: {{image.date | date : 'MMM dd hh yyyy:mm ss'}}</p>
 </div>

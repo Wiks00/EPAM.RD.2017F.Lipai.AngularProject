@@ -10,12 +10,26 @@ using System.Web.Helpers;
 using System.Web.Mvc;
 using AnimalsGallery.DAL;
 using AnimalsGallery.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AnimalsGallery.Controllers
 {
     public class ApiController : Controller
     {
         private readonly GalleryEntities galleryContext = new GalleryEntities();
+
+        [HttpPost]
+        public ActionResult SaveDescription(string text)
+        {
+            using (StreamWriter file = new StreamWriter(Server.MapPath("~/Content/about.txt")))
+            {
+                file.WriteLine(text);
+                file.Close();
+            }
+
+            return Json(new { success = true });
+        }
 
         [HttpGet]
         public ActionResult GetUser(string username)
@@ -69,8 +83,10 @@ namespace AnimalsGallery.Controllers
                                                                                             description = image.description,
                                                                                             price = image.price,
                                                                                             date = image.postDate,
-                                                                                            format = image.format.Substring(image.format.IndexOf("/") + 1)
-                                                                                             
+                                                                                            format = image.format.Substring(image.format.IndexOf("/") + 1),
+                                                                                            personalRating = new{ value = 0 },
+                                                                                            globalRating = new { value = 0 }
+
 
                 })
             }).ToList()
@@ -173,19 +189,18 @@ namespace AnimalsGallery.Controllers
         [HttpGet]
         public ActionResult TopThreeAlbums()
         {
-            if(galleryContext.Albums.Count(album => album.Images.Count(image => image.Votes.Count > 1) > 1) <= 2)
+            if(galleryContext.Albums.Count(album => Math.Abs(album.rating) > 0) <= 2)
                 return Json(new { success = false }, JsonRequestBehavior.AllowGet);
 
-            var albums = galleryContext.Albums.OrderBy(album => album.rating).Take(3);
-            var rndm = new Random(); 
+            var rndm = new Random();
 
-            return Json(albums.Select(album => new {
-                                                        id = album.id,
-                                                        title = album.title,
-                                                        rating = album.rating,
-                                                        image = album.Images.ElementAt(rndm.Next(0, album.Images.Count -1)).data
-                                                    }).ToList()
-                    , JsonRequestBehavior.AllowGet);
+            var albums = galleryContext.Albums.OrderBy(album => album.rating).Take(3).Select(album => new {
+                                                                                                                id = album.id,
+                                                                                                                title = album.title,
+                                                                                                                rating = new {value = album.rating}
+                                                                                                            });
+
+            return Json(albums.ToList(), JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

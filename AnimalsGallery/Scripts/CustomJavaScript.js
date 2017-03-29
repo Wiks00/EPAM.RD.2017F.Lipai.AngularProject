@@ -11,6 +11,7 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
         $rootScope.globals = $cookies.getObject("globals") || {};
         if ($rootScope.globals.currentUser) {
             $http.defaults.headers.common["Authorization"] = "Basic " + $rootScope.globals.currentUser.authdata;
+            $rootScope.globals.basket = $cookies.getObject("basket") || {};
         }
  
         $rootScope.$on("$locationChangeStart", function (event, next, current) {
@@ -27,17 +28,17 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 .when("/Angular",
                 {
                     templateUrl: "Views/Home/Main.html",
-                    controller: "GalleryController"
+                    controller: "MainController"
                 })
                 .when("/Angular/Index",
                 {
                     templateUrl: "Views/Home/Main.html",
-                    controller: "GalleryController"
+                    controller: "MainController"
                 })
                 .when("/Angular/About",
                 {
                     templateUrl: "Views/Home/About.html",
-                    controller: "GalleryController"
+                    controller: "AboutController"
                 })
                 .when("/Angular/Gallery",
                 {
@@ -53,6 +54,11 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 {
                     templateUrl: "Views/Moderator/ModeratePage.html",
                     controller: "ModeratorController"
+                })
+                .when("/Angular/Basket",
+                {
+                    templateUrl: "Views/Basket/Basket.html",
+                    controller: "BasketController"
                 })/*
                 .otherwise(
                 {
@@ -62,27 +68,119 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
 
             $locationProvider.html5Mode(true);
         }])
+    .controller("BasketController",
+        ["$rootScope", "$scope", "$cookieStore", function ($rootScope, $scope, $cookieStore) {
+
+            $scope.data = $rootScope.globals.basket.images;
+            $scope.total = 0;
+
+            _.each($scope.data, function (value, key, list) {
+                $scope.total += value.price;
+            });
+
+            $scope.deleteItem = function(index) {
+                $scope.data.splice(index, 1);
+                $rootScope.globals.basket.images = $scope.data;
+
+                $cookieStore.remove("basket");
+                $cookieStore.put("basket", $rootScope.globals.basket);
+
+                $scope.total = 0;
+
+                _.each($scope.data, function (value, key, list) {
+                    $scope.total += value.price;
+                });
+            } 
+
+            $scope.buy = function (images) {
+                $rootScope.globals.basket = {};
+                $scope.data = {};
+                $scope.total = 0;
+
+                $cookieStore.remove("basket");
+            }
+             
+        }]
+    ).controller("MainController",
+        ["$rootScope", "$scope", "FileService", function ($rootScope, $scope, FileService) {
+
+            $scope.data = [];
+            $scope.isEdit = false;
+            $scope.isUserAdmin = false;
+
+            if ($rootScope.CurrentUser.roles) {
+                $scope.isUserAdmin = $rootScope.CurrentUser.roles.includes("admin");
+            }
+
+            FileService.LoadTopThreeAlbums().then(function (response) {
+                $scope.data = response.data;
+            });
+
+            $scope.edit = function () {
+                $scope.isEdit = !$scope.isEdit;
+            };
+
+            $scope.changeDescription = function(text) {
+                FileService.SaveDescription(text);
+                $scope.isEdit = false;
+            };
+
+        }]
+    )
+    .controller("AboutController",
+        ["$scope", function ($scope) {
+
+            $scope.term = "provide";
+
+            $scope.desc = "and i'm popup with alot of uisifull information!";
+        }]
+    )
     .controller("ModeratorController",
-        ["$scope", "FileService", function ($scope, FileService) {
+        ["$scope", "_", "FileService", function ($scope, _, FileService) {
+
+            $scope.data = [];
 
             FileService.LoadImageForModeration().then(function (response) {
                 $scope.data = response.data;
             });
 
+
+            $scope.moderate = function(images) {
+                _.each(images, function (value, key, list) {
+                    FileService.ModerateImage(value.id, value.allowable);
+                });
+                $scope.data = {};
+            }
         }]
     )
     .controller("GalleryController",
-        ["$rootScope", "$scope", "_", "FileService", function ($rootScope, $scope, _,FileService) {
+        ["$rootScope", "$scope", "$cookieStore", "$location", "_", "FileService", function ($rootScope, $scope, $cookieStore, $location, _,FileService) {
             console.log("ActionController created");
+
+            $scope.data = [];
 
             FileService.GetAllAlbums().then(function (response) {
                 $scope.data = response.data;
-                $scope.formats = [];
+                var allImages = [];
+
+                $scope.formats = ["all"];
                 _.each($scope.data, function(value, key, list) {
                     _.each(value.images, function (value, key, list) {
+                        allImages.push(value);
                         $scope.formats.push(value.format);
                          });
                 });
+
+                $scope.data.push({ images: allImages, title: "all" });
+
+                if (!($location.search()).albumId) {
+                    $scope.selectedAlbum = $scope.data[0];
+                } else {
+                    var album = _.find($scope.data, function(num) {
+                        return num.id == ($location.search()).albumId;
+                    });
+                    $scope.selectedAlbum = $scope.data[$scope.data.indexOf(album)];
+                }
 
                 $scope.formats = _.uniq($scope.formats);
             });
@@ -91,25 +189,86 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
 
                 FileService.LoadPersonalImageVote(image.id, $rootScope.CurrentUser.id)
                     .then(function (response) {
-                        image.personalRating = response.data;
+                        image.personalRating = { value: response.data };
                     });
 
                 FileService.LoadImageRating(image.id)
                     .then(function (response) {
-                        image.globalRating = response.data;
+                        image.globalRating = { value: response.data };
                     });
 
-                $scope.data;
             };
 
             $scope.updateRating = function (imageId, rating, albumId) {
                 FileService.UpdateImageRating(imageId, rating, $rootScope.CurrentUser.id, albumId)
                     .then(function(response) {
                         if (response.data.success) {
-                            image.personalRating = rating;
-                            image.globalRating = data.newRating;
+                            image.personalRating = { value: rating };
+                            image.globalRating = { value: data.newRating };
                         }
                 });
+            };
+
+            $scope.isInBasket = function(image) {
+                var button = document.getElementById("dtn" + image.id);
+
+                if (!$cookieStore.get("basket") || !_.findWhere($rootScope.globals.basket.images,{id : image.id})) {
+                    button.value = "buy";
+                    return "buy";
+                } else {                    
+                    button.value = "in basket";
+                    return "in basket";
+                }
+
+            };
+
+            $scope.buyImage = function (image) {
+                $scope.isInBasket(image);
+                if (!$cookieStore.get("basket")) {
+
+                    $rootScope.globals.basket = {
+                            user: $rootScope.CurrentUser.id,
+                            images: [image]
+                    };
+
+                    $cookieStore.put("basket", $rootScope.globals.basket);
+
+                } else {
+
+                    $cookieStore.remove("basket");
+
+                    $rootScope.globals.basket.images.push(image);
+
+                    $rootScope.globals.basket.images = _.uniq($rootScope.globals.basket.images);
+
+                    $cookieStore.put("basket", $rootScope.globals.basket);
+                }
+            };
+
+            $scope.filter = function(format, index) {
+
+                var button = document.getElementById("format" + index);
+                var cssClass = "active";
+                
+                if (!button.classList.contains(cssClass)) {
+                    button.classList.add(cssClass);
+                } else {
+                    button.classList.remove(cssClass);
+                }
+                var images;
+
+                if (format === "all") {
+                    images = document.getElementsByClassName("filter");
+                    _.each(images, function(value, key, list) {
+                        value.style.display = (value.style.display == "none") ? "" : "none";
+                    });
+                } else {
+                    images = document.getElementsByClassName(format);
+                    _.each(images, function(value, key, list) {
+                        value.style.display = (value.style.display == "none") ? "" : "none";
+                    });
+
+                }
             };
 
             $scope.close = function() {
@@ -121,10 +280,13 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
         }]
     )
     .controller("HeaderController",
-        ["$rootScope", "$scope", "$http", "$cookies", "AuthenticationService", "UserService", function ($rootScope, $scope, $http, $cookies, AuthenticationService, UserService) {
+        ["$rootScope", "$scope", "$http", "$cookies", "$location", "AuthenticationService", "UserService", function ($rootScope, $scope, $http, $cookies, $location, AuthenticationService, UserService) {
 
+            $rootScope.CurrentUser = {};
             $scope.isUserLoggedIn = !!$rootScope.globals.currentUser;
             $scope.LoginOrRegister = "Login";
+            $scope.isUserModerator = false;
+            $scope.isUserAdmin = false;
 
             if ($scope.isUserLoggedIn) {
                 UserService.GetByUsername($rootScope.globals.currentUser.username)
@@ -160,6 +322,9 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 $scope.isUserLoggedIn = false;
                 $scope.isUserModerator = false;
                 $scope.isUserAdmin = false;
+
+                $location.path("Angular/Index");
+                $location.replace();
             }
 
             $scope.Login = function (userName,password) {
@@ -176,6 +341,8 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 AuthenticationService.SetCredentials(userName, password);
                 $scope.isUserLoggedIn = true;
 
+                $rootScope.globals.basket = $cookies.getObject("basket") || {} ;
+
                 UserService.GetByUsername($rootScope.globals.currentUser.username)
                     .then(function (response) {
                         $rootScope.CurrentUser = response.data;
@@ -186,11 +353,13 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
         }]
     )
     .controller("ImageUploaderController",
-        ["$rootScope", "$scope", "FileService", function ($rootScope, $scope, FileService) {
+        ["$rootScope", "$scope", "$http", "FileService", function ($rootScope, $scope, $http, FileService) {
             console.log("ActionController created");
 
             $scope.items = ["byFileSystem", "byUrl"];
             $scope.selection = $scope.items[0];
+
+            $scope.image = {};
 
             $scope.Albums = $rootScope.CurrentUser.albums;
 
@@ -201,18 +370,67 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                     image.Allowable = false;
                 }
 
+                if ($scope.selection == "byUrl") {
+
+                    //code will be heare
+                }
+
                 image.AlbumId = image.AlbumId.id;
 
                 FileService.UploadImage(image);
+
+                $scope.image = {};
             };
 
             $scope.AddAlbum = function (title) {
                 FileService.AddAlbum(title, $rootScope.CurrentUser.id);
 
             };
-
         }]
     )
+    .directive("ngPopupTerm", [function () {
+
+        return {
+            restrict: "E",
+            replace: true,
+            template:
+              "<div style='display: inline-block;'><div ng-mouseover='showPopover()' ng-mouseleave='hidePopover()'>{{term}}</div>" +
+              "<div style='position: absolute; z-index: 100; background-color: black; color: #ffffff;' ng-show='popoverIsVisible'>{{description}}</div></div>",
+            scope: {
+                term: "=",
+                description:"="
+            },
+            link: function (scope, element, attrs) {
+                scope.popoverIsVisible = false;
+
+                scope.showPopover = function () {
+                    scope.popoverIsVisible = true;
+                };
+
+                scope.hidePopover = function () {
+                    scope.popoverIsVisible = false;
+                };
+            }
+        };
+    }])
+    .directive("ngSpoiler", [ function() {
+
+        return {
+            restrict: "EA",
+            replace: true,
+            template:
+              "<div ng-click='activate()' style='width: 50px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;'>{{text}}</div>",
+            scope: {
+                text: "=ngModel"
+            },
+            link: function(scope, element, attrs) {
+
+                scope.activate = function () {
+                    element[0].style.overflow = (element[0].style.overflow == "hidden") ? "visible" : "hidden";
+                };
+            }
+        };
+    }])
     .directive("fileread", [function () {
         return {
             scope: {
@@ -269,7 +487,7 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                   "</ul>",
                 scope: {
                     ratingValue: "=ngModel",
-                    max: "=?", // optional (default is 5)
+                    max: "=?",
                     onRatingSelect: "&?",
                     readonly: "=?"
                 },
@@ -278,25 +496,20 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                         scope.max = 5;
                     }
 
-                    scope.stars = [];
-                    for (var i = 0; i < scope.max; i++) {
-                        scope.stars.push({
-                            filled: i < scope.ratingValue
-                        });
-                    }
+                    updateStars();
 
                     function updateStars() {
                         scope.stars = [];
                         for (var i = 0; i < scope.max; i++) {
                             scope.stars.push({
-                                filled: i < scope.ratingValue
+                                filled: i < scope.ratingValue.value
                             });
                         }
                     };
 
                     scope.toggle = function (index) {
                         if (scope.readonly == undefined || scope.readonly === false) {
-                            scope.ratingValue = index + 1;
+                            scope.ratingValue.value = index + 1;
                             scope.onRatingSelect({
                                 rating: index + 1
                             });
@@ -304,34 +517,12 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                     };
 
                     scope.$watch("ratingValue", function (oldValue, newValue) {
-                        if (newValue) {
+                        if (newValue.value) {
                             updateStars();
                         }
                     });
                 }
             };
-        }
-    ])
-    .directive("ngSpoiler", [
-        function () {
-            return {
-                restrict: "E", //E - element <ng-dir/>, A- attr <div ng-dir/>
-                replace: true, //do we need replace element content
-                templateUrl: "Views/Gallery/ImagePreview.html", //for what we raplace
-                scope: {    //model ("=" - binding for both side)
-                    text: "=",
-                    description: "="
-                }, 
-                controller: ["$scope", "service", //controller
-                    function($scope, service) {
-                        $scope.isActive = false;
-
-                        $scope.Activate = function() {
-                            $scope.isActive = !$scope.isActive;
-                        };
-                    }
-                ]
-            }
         }
     ])
     .service("AuthenticationService", ["$rootScope", "$http", "$cookieStore", "$timeout", "Base64", "UserService", function ($rootScope, $http, $cookieStore, $timeout, Base64, UserService) {
@@ -370,6 +561,7 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 $rootScope.CurrentUser = {};
                 $rootScope.globals = {};
                 $cookieStore.remove("globals");
+                $cookieStore.remove("basket");
                 $http.defaults.headers.common.Authorization = "Basic ";
             }
         }
@@ -377,6 +569,9 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
     .service("FileService", ["$http", function ($http) {
 
         return {
+            SaveDescription: function (text) {
+                $http.post("/Api/SaveDescription", { text: text });
+            },
 
             GetAllAlbums: function() {
                 return $http.get("/Api/GetAllAlbums");
@@ -390,6 +585,9 @@ angular.module("main", ["ngRoute", "ngCookies", "underscore"])
                 return $http.get("/Api/LoadAlbums", { params: { userId: userId } });
             },
 
+            LoadTopThreeAlbums: function () {
+                return $http.get("/Api/TopThreeAlbums");
+            },
             UploadImage: function (image) {
                 $http.post("/Api/UploadImage", { image });
             },
